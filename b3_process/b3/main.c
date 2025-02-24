@@ -3,7 +3,7 @@
 #include<unistd.h>
 #include<sys/types.h>
 #include<sys/wait.h>
-void func(int signum)
+void func()
 {
 	int status, rv;
 	rv = wait(&status);

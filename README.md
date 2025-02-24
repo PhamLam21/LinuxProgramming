@@ -68,11 +68,11 @@ hellomake: hello.c main.c
 - Argv, environ: tham số môi trường
 - Kernel  
 ### Virtual memory:  
-Bộ nhớ ảo (virtual memory) là một kỹ thuật quản lý bộ nhớ trong hệ điều hành hiện đại, cho phép máy tính "ảo hóa" bộ nhớ vật lý (RAM) thành một không gian bộ nhớ liên tục và rộng lớn hơn so với bộ nhớ vật lý sẵn có.  
-- Process được nạp vào RAM được gọi là page.
-- 1 page = 1 frame trong RAM.
+Bộ nhớ ảo (virtual memory) là một kỹ thuật quản lý bộ nhớ trong hệ điều hành hiện đại, cho phép máy tính "ảo hóa" bộ nhớ vật lý (RAM) thành một không gian bộ nhớ liên tục và rộng lớn hơn so với bộ nhớ vật lý sẵn có  
 - Hệ điều hành sử dụng bảng trang (page table) để chuyển đổi địa chỉ ảo (virtual addresses) mà chương trình sử dụng thành địa chỉ vật lý (physical addresses) trong RAM 
 - Page table: bảng ánh xạ vd page 0 -> frame 1, page 1 -> frame 3 ...
+- Khi một trang dữ liệu không nằm trong RAM (do bị swap ra ổ đĩa), hệ điều hành sẽ thực hiện cơ chế gọi là "paging" hay "swapping" để đưa dữ liệu cần thiết về RAM và chuyển dữ liệu không cần thiết xuống ổ đĩa  
+- Cơ chế virtual memory: Quản lý theo frame, chia nhr process load lên frame còn trống
 ### Exec-family: 
 - execl("/bin/ls", "ls", "-l", "-a", "-h", NULL) -> chạy lệnh ls -lah
 - execl("/bin/ls", "ls", "-l", "-a", NULL) -> chạy lệnh ls -la
@@ -85,3 +85,12 @@ Bộ nhớ ảo (virtual memory) là một kỹ thuật quản lý bộ nhớ tr
 #### Kết thúc tiến trình
 - Kết thúc tiến trình bình thường: 1 tiến trình hoàn thành việc thực thi của nó bằng cách gọi system call `void _exit(int status)`
 - Kết thúc bất thường: đang chạy thì kết thúc vd dùng command `kill`
+#### Quản lý tiến trình con
+- Sử dụng system call: `int wait(int* status)` trả về pid của tiến trình con kết thúc, khi gọi hàm wait() thì tiến trình cha sẽ block tại hàm đó đợi trả về  
+- `pid_t waitpid(pid_t pid, int *status, int options)`: đợi giá trị trả về của 1 pid cụ thể  
+#### Tiến trình orphane và zombie
+- Orphane: tiến trình cha kết thúc trước tiến trình con -> tiến trình con sẽ chuyển cho tiến trình init pid = 1 quản lý
+- Zombie: tiến trình con kết thúc trước tiến trình cha trước hàm wait để nhận giá trị trả về từ tiến trình con để  tiến trình con kết thúc -> sinh ra tiến trình con sẽ không kill được và không được hoàn toàn giải phóng khỏi hệ thống -> nếu sinh nhiều zombie process pid bị đầy ảnh hưởng đến việc tạo process mới
+- Ngăn chặn zombie process:
+    - Sử dụng wait(): Luôn gọi wait() ở tiến trình cha
+    - Sử dụng signal SIGCHLD: Tiến trình con kết thúc, một tín hiệu SIGCHLD sẽ được gửi tới tiến trình cha của nó  
