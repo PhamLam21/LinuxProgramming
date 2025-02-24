@@ -1,0 +1,5 @@
+int open("Namefile", int flags, mode_t mode); -> mở file
+ssize_t read(int fd, void* bufer, size_t count); -> đọc file
+ssize_t write(int fd, void *buffer, size_ count); -> ghi file
+off_t lseek(int fd, off_t offset, int whence); ->  offset vị trí con trỏ file  
+int close(int fd); -> đóng file
