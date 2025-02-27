@@ -1,0 +1,45 @@
+*thread -> 1 process nhẹ
+        nằm trong stack 
+        cùng 1 process
+*Ưu điểm so với process:
+    -> context swiching(chuyển trạng thái): thread nhanh hơn vì nhẹ hơn
+    -> giao tiếp giữa 2 thread dễ hơn vì nằm trong cùng 1 vùng nhớ
+*Crashed: -> process khác không ảnh hưởng
+          -> thread khác cũng bị ngừng (các thread ngang hành nhau)
+*thread id: process id là duy nhất trong toàn hệ thống, thread id là duy nhất trong 1 tiến trình 
+            -> process id là số nguyên còn thread id có thể còn là 1 structure
+            -> khó in, khó so sánh
+            -> pthread_t
+    Hàm thường sd: pthread_self() <=> getpid()
+                   pthread_equal() -> so sánh giữa 2 thread id (tra về 0 nếu khác và ngược lại) 
+
+*tạo thread :
+    int pthread_create(pthread_t *threadID, const pthread_attr_t *attr, void*(*start)(void*), void *arg);
+    -> đối số đầu: 1 tt mới được gọi thành công, đối số đầu tiên sẽ giữ thread ID của thread mới được tạo
+    -> đối số 2: thường là NULL
+    -> đối số 3: 1 con hàm trỏ, mỗi 1 thread sẽ chạy riêng 1 func, địa chỉ của func sẽ được truyền vào đối số thứ 3 để linux biết bđ chạy từ đâu
+    -> đối số 4: truyền dữ liệu bất kỳ để xử lý hàm
+*Kết thúc thread 
+    pthread_exit(void *retval);
+    pthread_cancel(pthread_t pthread);
+*Don dep va thu về giá trị kết thúc của thread
+    pthread_join();
+    pthread_detach(pthread_t pthread); -> tu dong don dep thread 
+
+*Dong bo du lieu
+    -> Mutex: su dung khoa moi khi 1 thread su dung du lieu nao don
+    -> bien pthread_mutex_t
+    khai bao bien:
+        -> Tinh: pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+        -> Dong: int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
+                pthread_mutex_destroy() -> giai phong
+    sau khi khoi tao khoa -> unlock
+    lock: pthread_mutex_lock();
+    unlock: pthread_mutex_unlock();
+*Condition variables: bien gui tin hieu thong bao 
+    Khai bao bien:
+        -> Tinh: pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+        -> Dong: int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr);
+                pthread_cond_destroy(); -> giai phong
+    2 ky thuat chinh : pthread_cond_signal(pthrea_cond_t *cond);
+                        pthread_cond_wait(pthrea_cond_t *cond);

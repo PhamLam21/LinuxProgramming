@@ -94,3 +94,53 @@ Bộ nhớ ảo (virtual memory) là một kỹ thuật quản lý bộ nhớ tr
 - Ngăn chặn zombie process:
     - Sử dụng wait(): Luôn gọi wait() ở tiến trình cha
     - Sử dụng signal SIGCHLD: Tiến trình con kết thúc, một tín hiệu SIGCHLD sẽ được gửi tới tiến trình cha của nó  
+## Thread
+- Là một lightweight process có thể được quản lý độc lập bởi một bộ lập lịch
+- Tương tự như process, thread được tạo ra với mục đích xử lý đồng thời nhiều công việc cùng một lúc (mutil-task)
+- 1 hệ thống có nhiều process, 1 process có nhiều thread
+- Định danh trong process bằng thread id
+- Nếu 1 thread bị block thì các thread khác vẫn hoạt động bình thường
+- 1 thread được tạo sẽ nằm trong stack segment
+### So sánh với process
+- Context swiching(chuyển trạng thái): thread nhanh hơn vì nhẹ hơn
+- Trao đổi dữ liệu, giao tiếp giữa 2 thread dễ hơn vì nằm trong cùng 1 vùng nhớ  
+- Crashed: 
+    - Các process khác vẫn hoạt động bình thuờng
+    - Các thread khác cũng bị crash
+- ID: 
+    - process id: duy nhất trong toàn hệ thống
+    - thread id: duy nhất trong process
+### Các hàm sử dụng thread
+- Hàm về thread id: 
+    - pthread_self() <=> getpid()
+    - pthread_equal() -> so sánh 2 thread id
+- Tạo mới: `int pthread_create(pthread_t *threadID, const pthread_attr_t *attr, void*(*start)(void*), void *arg);`
+    - Đối số đầu: 1 tt mới được gọi thành công, đối số đầu tiên sẽ giữ thread ID của thread mới được tạo
+    - Đối số 2: thường là NULL
+    - Đối số 3: 1 con hàm trỏ, mỗi 1 thread sẽ chạy riêng 1 func, địa chỉ của func sẽ được truyền vào đối số thứ 3 để linux biết bđ chạy từ đâu
+    - Đối số 4: truyền dữ liệu bất kỳ để xử lý hàm
+- Kết thúc thread:
+    - pthread_exit(void *retval);
+    - pthread_cancel(pthread_t pthread);
+- Dọn dẹp và thu về giá trị kết thúc của thread:
+    - pthread_join();
+    - pthread_detach(pthread_t pthread); -> tu dong don dep thread  
+### Đồng bộ dữ liệu
+#### Mutex
+- Sử dụng khoá khi 1 thread sử dụng dữ liệu
+- Cấp phát tĩnh: pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+- Cấp phát động: int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
+    - Giải phóng: pthread_mutex_destroy()  
+- Lock: pthread_mutex_lock();
+- Unlock: pthread_mutex_unlock();
+#### Condition variables
+- Biến gửi tín hiệu thông báo để 2 thread làm việc với nhau  
+- Khai báo biến:
+    - Tĩnh: pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+    - Động: int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr);
+    - Giải phóng khi khai báo động: pthread_cond_destroy();  
+- Sử dụng:
+    - pthread_cond_signal(pthrea_cond_t *cond); -> gửi tín hiệu nhả mutex cho thread khác sử dụng
+    - pthread_cond_wait(pthrea_cond_t *cond); -> đợi tín hiệu từ cond_signal để lấy khoá mutex và thực hiện chương trình  
+### Tool debug
+- gdb, valgrind, strace
